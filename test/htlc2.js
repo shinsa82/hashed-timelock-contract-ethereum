@@ -179,7 +179,6 @@ contract('HashedTimelock (client EPS-converted)', accounts => {
     const client = new Client()
     client.raise('newContract')
     await client.loop()
-    // await client.withdraw()
   })
 
   it.skip('withdraw() should fail if preimage does not hash to hashX', async () => {
@@ -288,45 +287,107 @@ contract('HashedTimelock (client EPS-converted)', accounts => {
     await client.loop()
   })
 
-  it.skip('refund() should pass after timelock expiry', async () => {
+  it('refund() success case', async () => {
+    const { StateMachine } = require('./StateMachine.js')
     const hashPair = newSecretHashPair()
     const htlc = await HashedTimelock.new()
     const timelock1Second = nowSeconds() + 1
 
-    const newContractTx = await htlc.newContract(
-      receiver,
-      hashPair.hash,
-      timelock1Second,
-      {
-        from: sender,
-        value: oneFinney,
-      }
-    )
-    const contractId = txContractId(newContractTx)
+    let newContractTx
+    let contractId
+    let receiverBalBefore
+    let withdrawTx
+    let balBefore
+    let refundTx
 
-    // wait one second so we move past the timelock time
-    return new Promise((resolve, reject) =>
-      setTimeout(async () => {
+    class Client extends StateMachine {
+      constructor() {
+        super()
+      }
+
+      async newContract() {
+        console.log('newContract')
+        newContractTx = await htlc.newContract(
+          receiver,
+          hashPair.hash,
+          timelock1Second,
+          {
+            from: sender,
+            value: oneFinney,
+          }
+        )
+        contractId = txContractId(newContractTx)
+        balBefore = await getBalance(sender)
+        this.raise('refund')
+      }
+
+      async withdraw() {
+        await require('delay')(1000)
+        console.log('withdraw')
         try {
-          const balBefore = await getBalance(sender)
-          const refundTx = await htlc.refund(contractId, { from: sender })
-          const tx = await web3.eth.getTransaction(refundTx.tx)
-          // Check contract funds are now at the senders address
-          const expectedBal = balBefore.add(oneFinney).sub(txGas(refundTx, tx.gasPrice))
-          assertEqualBN(
-            await getBalance(sender),
-            expectedBal,
-            "sender balance doesn't match"
-          )
-          const contract = await htlc.getContract.call(contractId)
-          assert.isTrue(contract[6]) // refunded set
-          assert.isFalse(contract[5]) // withdrawn still false
-          resolve()
-        } catch (err) {
-          reject(err)
+          // receiver calls withdraw with the secret to get the funds
+          withdrawTx = await htlc.withdraw(contractId, hashPair.secret, {
+            from: receiver,
+          })
+          this.raise('withdraw_end')
+        } catch (e) {
+          this.raise('withdraw_err')
         }
-      }, 1000)
-    )
+      }
+
+      async withdraw_end() {
+        console.log('withdraw_end')
+        const tx = await web3.eth.getTransaction(withdrawTx.tx)
+        // Check contract funds are now at the receiver address
+        const expectedBal = receiverBalBefore
+          .add(oneFinney)
+          .sub(txGas(withdrawTx, tx.gasPrice))
+        assertEqualBN(
+          await getBalance(receiver),
+          expectedBal,
+          "receiver balance doesn't match"
+        )
+        const contractArr = await htlc.getContract.call(contractId)
+        const contract = htlcArrayToObj(contractArr)
+        assert.isTrue(contract.withdrawn) // withdrawn set
+        assert.isFalse(contract.refunded) // refunded still false
+        assert.equal(contract.preimage, hashPair.secret)
+      }
+
+      async refund() {
+        await require('delay')(1000)
+        console.log('refund')
+        try {
+          // receiver calls withdraw with the secret to get the funds
+          refundTx = await htlc.refund(contractId, { from: sender })
+          this.raise('refund_end')
+        } catch (err) {
+          this.raise('refund_err', err)
+        }
+      }
+
+      async refund_end() {
+        console.log('refund_end')
+        const tx = await web3.eth.getTransaction(refundTx.tx)
+        // Check contract funds are now at the senders address
+        const expectedBal = balBefore.add(oneFinney).sub(txGas(refundTx, tx.gasPrice))
+        assertEqualBN(
+          await getBalance(sender),
+          expectedBal,
+          "sender balance doesn't match"
+        )
+        const contract = await htlc.getContract.call(contractId)
+        assert.isTrue(contract[6]) // refunded set
+        assert.isFalse(contract[5]) // withdrawn still false
+      }
+
+      async refund_err(err) {
+      }
+    }
+
+    const client = new Client()
+    client.raise('newContract')
+    await client.loop()
   })
 
   it.skip('refund() should fail before the timelock expiry', async () => {
