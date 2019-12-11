@@ -16,7 +16,8 @@
     "ganache-start": "ganache-cli --networkId 4447 --port 7545",
     "lint": "solium -d contracts/",
     "test": "truffle test",
-    "test:htlc": "truffle test ./test/htlc.js"
+    "test:htlc": "truffle test ./test/htlc.js",
+    "test:htlc2": "truffle test ./test/htlc2.js"
   },
   "keywords": [
     "ethereum",
@@ -26,15 +27,15 @@
   ],
   "homepage": "https://github.com/chatch/hashed-timelock-contract-ethereum#README.md",
   "dependencies": {
-    "openzeppelin-solidity": "^2.1.2",
+    "openzeppelin-solidity": "^2.4.0",
     "solium": "^1.2.5"
   },
   "devDependencies": {
-    "eslint": "^5.13.0",
+    "eslint": "^5.16.0",
     "ethlint": "^1.2.5",
     "ganache-cli": "^6.7.0",
-    "truffle": "^5.0.8",
+    "truffle": "^5.1.3",
     "truffle-assertions": "^0.8.2",
-    "truffle-hdwallet-provider": "^1.0.3"
+    "truffle-hdwallet-provider": "^1.0.17"
   }
 }
