@@ -31,6 +31,7 @@
     "solium": "^1.2.5"
   },
   "devDependencies": {
+    "delay": "^4.3.0",
     "eslint": "^5.16.0",
     "ethlint": "^1.2.5",
     "ganache-cli": "^6.7.0",
