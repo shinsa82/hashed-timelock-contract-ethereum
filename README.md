@@ -1,7 +1,24 @@
 # Note
 
-HTLCを論文での実証実験用に書き直しているプロジェクト
+HTLCを論文での実証実験用に書き直しているプロジェクト。
+以下の順番で試す。
 
+## 準備
+
+- Node 10.x を用意。ganache (というか keccak?) 関連のバグで、バージョンが8や12だと入らない。
+- Python 2.x
+- `npm i`
+
+## 単一台帳、単一コントラクト
+
+2窓で実行
+
+- 窓1: ganache起動。`npm run ganache-start`
+- 窓2: テスト。`npm test`
+
+## 単一台帳、2コントラクト
+
+## オリジナルコード
 # hashed-timelock-contract-ethereum
 
 [![NPM Package](https://img.shields.io/npm/v/ethereum-htlc.svg?style=flat-square)](https://www.npmjs.org/package/ethereum-htlc)
