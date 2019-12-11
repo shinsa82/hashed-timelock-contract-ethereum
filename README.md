@@ -1,3 +1,7 @@
+# Note
+
+HTLCを論文での実証実験用に書き直しているプロジェクト
+
 # hashed-timelock-contract-ethereum
 
 [![NPM Package](https://img.shields.io/npm/v/ethereum-htlc.svg?style=flat-square)](https://www.npmjs.org/package/ethereum-htlc)
