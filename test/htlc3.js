@@ -268,8 +268,8 @@ contract('HashedTimelock (both EPS-converted)', accounts => {
   it('refund() fail case', async () => {
     const { StateMachine } = require('./StateMachine.js')
     const hashPair = newSecretHashPair()
-    // const htlc = await HashedTimelock.new()
-    const htlc = await HashedTimelockEps.deployed()
+    const htlc = await HashedTimelockEps.new()
+    // const htlc = await HashedTimelockEps.deployed()
     // const timelock1Second = nowSeconds() + 1
 
     let newContractTx
