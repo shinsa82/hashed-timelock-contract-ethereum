@@ -29,7 +29,9 @@ contract HashedTimelockEps {
         uint timelock
     );
     event LogHTLCWithdraw(bytes32 indexed contractId);
+    event LogHTLCWithdrawError();
     event LogHTLCRefund(bytes32 indexed contractId);
+    event LogHTLCRefundError();
 
     struct LockContract {
         address payable sender;
@@ -70,6 +72,11 @@ contract HashedTimelockEps {
         require(contracts[_contractId].timelock > now, "withdrawable: timelock time must be in the future");
         _;
     }
+    function _withdrawable(bytes32 _contractId) internal returns (bool) {
+        return contracts[_contractId].receiver == msg.sender &&
+        contracts[_contractId].withdrawn == false &&
+        contracts[_contractId].timelock > now;
+    }
     modifier refundable(bytes32 _contractId) {
         require(contracts[_contractId].sender == msg.sender, "refundable: not sender");
         require(contracts[_contractId].refunded == false, "refundable: already refunded");
@@ -77,7 +84,13 @@ contract HashedTimelockEps {
         require(contracts[_contractId].timelock <= now, "refundable: timelock not yet passed");
         _;
     }
-
+    function _refundable(bytes32 _contractId)  internal returns (bool) {
+        return 
+            contracts[_contractId].sender == msg.sender &&
+            contracts[_contractId].refunded == false &&
+            contracts[_contractId].withdrawn == false &&
+            contracts[_contractId].timelock <= now;
+    }
     mapping (bytes32 => LockContract) contracts;
 
     /**
@@ -147,15 +160,27 @@ contract HashedTimelockEps {
         external
         contractExists(_contractId)
         hashlockMatches(_contractId, _preimage)
-        withdrawable(_contractId)
-        returns (bool)
+        returns (bool,bool)
     {
+        if (!_withdrawable(_contractId)) {
+            return withdraw_err();
+        }
         LockContract storage c = contracts[_contractId];
         c.preimage = _preimage;
         c.withdrawn = true;
         c.receiver.transfer(c.amount);
+        // emit LogHTLCWithdraw(_contractId);
+        return withdraw_end(_contractId, true);
+    }
+
+    function withdraw_end(bytes32 _contractId, bool ret) internal returns (bool,bool) {
         emit LogHTLCWithdraw(_contractId);
-        return true;
+        return (ret, true);
+    }
+
+    function withdraw_err() internal returns (bool, bool) {
+        emit LogHTLCWithdrawError();
+        return (false,false);
     }
 
     /**
@@ -168,14 +193,25 @@ contract HashedTimelockEps {
     function refund(bytes32 _contractId)
         external
         contractExists(_contractId)
-        refundable(_contractId)
-        returns (bool)
+        returns (bool,bool)
     {
+        if(!_refundable(_contractId)) {
+            return refund_err();   
+        }
         LockContract storage c = contracts[_contractId];
         c.refunded = true;
         c.sender.transfer(c.amount);
+        return refund_end(_contractId, true);
+    }
+
+    function refund_end(bytes32 _contractId, bool ret) internal returns (bool,bool) {
         emit LogHTLCRefund(_contractId);
-        return true;
+        return (ret, true);
+    }
+
+    function refund_err() internal returns (bool, bool) {
+        emit LogHTLCRefundError();
+        return (false,false);
     }
 
     /**

@@ -1,4 +1,6 @@
 const { assertEqualBN } = require('./helper/assert');
+const truffleAssert = require('truffle-assertions');
+
 const {
   bufToStr,
   getBalance,
@@ -21,7 +23,7 @@ const hourSeconds = 3600
 const timeLock1Hour = nowSeconds() + hourSeconds
 const oneFinney = web3.utils.toWei(web3.utils.toBN(1), 'finney')
 
-contract('HashedTimelock (client EPS-converted)', accounts => {
+contract('HashedTimelock (both EPS-converted)', accounts => {
   const sender = accounts[1]
   const receiver = accounts[2]
 
@@ -129,13 +131,16 @@ contract('HashedTimelock (client EPS-converted)', accounts => {
       async withdraw() {
         await require('delay')(1000)
         console.log('withdraw')
-        try {
-          // receiver calls withdraw with the secret to get the funds
-          withdrawTx = await htlc.withdraw(contractId, hashPair.secret, { from: receiver })
+
+        // receiver calls withdraw with the secret to get the funds
+        withdrawTx = await htlc.withdraw(contractId, hashPair.secret, { from: receiver })
+        const evName = withdrawTx.logs[0].event
+        if (evName === 'LogHTLCWithdraw') {
           this.raise('withdraw_end')
-        } catch (err) {
-          this.raise('withdraw_err', err)
+        } else if (evName === 'LogHTLCWithdrawError') {
+          this.raise('withdraw_err', null)
         }
+        // truffleAssert.eventEmitted(withdrawTx, 'LogHTLCWithdraw')
       }
 
       async withdraw_end() {
@@ -145,7 +150,7 @@ contract('HashedTimelock (client EPS-converted)', accounts => {
 
       async withdraw_err(err) {
         console.log('withdraw_err')
-        assert.isTrue(err.message.startsWith(REQUIRE_FAILED_MSG))
+        // assert.isTrue(err.message.startsWith(REQUIRE_FAILED_MSG))
       }
     }
 
@@ -224,12 +229,15 @@ contract('HashedTimelock (client EPS-converted)', accounts => {
       async refund() {
         await require('delay')(1000)
         console.log('refund')
-        try {
-          // receiver calls withdraw with the secret to get the funds
-          refundTx = await htlc.refund(contractId, { from: sender })
+
+        // receiver calls withdraw with the secret to get the funds
+        refundTx = await htlc.refund(contractId, { from: sender })
+
+        const evName = refundTx.logs[0].event
+        if (evName === 'LogHTLCRefund') {
           this.raise('refund_end')
-        } catch (err) {
-          this.raise('refund_err', err)
+        } else if (evName === 'LogHTLCRefundError') {
+          this.raise('refund_err', null)
         }
       }
 
@@ -327,12 +335,14 @@ contract('HashedTimelock (client EPS-converted)', accounts => {
 
       async refund() {
         console.log('refund')
-        try {
-          // receiver calls withdraw with the secret to get the funds
-          refundTx = await htlc.refund(contractId, { from: sender })
+        // receiver calls withdraw with the secret to get the funds
+        refundTx = await htlc.refund(contractId, { from: sender })
+
+        const evName = refundTx.logs[0].event
+        if (evName === 'LogHTLCRefund') {
           this.raise('refund_end')
-        } catch (err) {
-          this.raise('refund_err', err)
+        } else if (evName === 'LogHTLCRefundError') {
+          this.raise('refund_err', null)
         }
       }
 
@@ -342,7 +352,8 @@ contract('HashedTimelock (client EPS-converted)', accounts => {
       }
 
       async refund_err(err) {
-        assert.isTrue(err.message.startsWith(REQUIRE_FAILED_MSG))
+        console.log('refund_err')
+        // assert.isTrue(err.message.startsWith(REQUIRE_FAILED_MSG))
       }
     }
 
