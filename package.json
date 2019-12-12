@@ -18,6 +18,7 @@
     "test:htlc": "truffle test ./test/htlc.js",
     "test:htlc2": "truffle test ./test/htlc2.js",
     "test:htlc3": "truffle test ./test/htlc3.js",
+    "test:htlc4": "truffle test ./test/htlc4.js",
     "test": "truffle test"
   },
   "keywords": [

@@ -38,6 +38,7 @@ HTLCを論文での実証実験用に書き直しているプロジェクト。
 `withdraw()` の成功・失敗と、`refund()` の成功・失敗について書き換えた。
 
 - 窓1: テスト。`npm run test:htlc3`
+- 窓1: modifierテスト。`npm run test:htlc4`
 
 ここからがデモるための最低条件
 
@@ -53,17 +54,29 @@ HTLCを論文での実証実験用に書き直しているプロジェクト。
 
 ## コントラクト変換
 
-いくつか仮定と制限をおく。
+**いくつか仮定と制限をおく。**
 TX が revert すると状態の変更ができないため。ただし、低レベルコールを使うと他のコントラクトを呼び出した結果がrevertしたかどうかを取れるらしい。ので、今回は時間が足りないが、やはりwrapperコントラクトとして状態機械を実装し、そちらで例外の処理と状態の管理をするのはよいと思う。
 
-- revert しているメソッドを、revert しないものに書き換える。そのかわり TX の成功・失敗を返り値の末尾につける
+- revert しているメソッドを、revert しないものに書き換える。そのかわり TX の成功・失敗を返り値の末尾につけるとともに[成功・]失敗イベントを発生させる
 - modifier ですべてのエラーチェックが済んでいて、本文ではエラーが起きないものとする (Solidity のbest practice にある内容なので、無茶な仮定ではないと思う)
+- modifier の中身はすべて require 文である。
 - emit があるとしたら return 文の直前にある。
-- 内部変数を書き換えるアノテーション (modifier) が使えないので、関数本体に挿入する (もしくはwrapperで管理する) ことを想定。
+- ~~内部変数を書き換えるアノテーション (modifier) が使えないので、関数本体に挿入する (もしくはwrapperで管理する) ことを想定。~~ うそ、pattern としてはあまりよくないが書くことは可能であるし、公式ドキュメントに例も見つけた。現在作成中。とりあえずはシンプルな遷移のみチェック。
 
 変換ルール
 
 ```
+modifier m_1(...) {
+  req_1;  // require statements
+  req_2;
+  ...;
+  _;
+}
+
+constructor() {
+  ...
+}
+
 // m_i は modifier
 function f(args) m_1, m_2, ..., m_n returns T { 
   S;
@@ -75,30 +88,38 @@ function f(args) m_1, m_2, ..., m_n returns T {
 を
 
 ```
-function f(args) state_check returns (T, bool) { // state_check is modifier
-  状態遷移
-  if !(m_1(...)) return f_err()
+modifier init(q) {
+  _;
+  state = q
+}
+
+function _m(...) internal returns (bool) {
+  return req_1 && ... & req_n;
+}
+
+constructor init(q) {
   ...
-  if !(m_n(...)) return f_err()
+}
+
+function f(args) transition(from, to) returns (T, bool) { // state_check is modifier
+  if !(_m_1(...)) return f_err()
+  ...
+  if !(_m_n(...)) return f_err()
   S
   return f_end(v_T)
 }
 
 function f_err() internal returns (T, bool) {
-  状態遷移
   emit f_err;
   return (*, false); // * is zero value of type T
 }
 
 function f_end(T v) internal returns (T, bool) {
-  状態遷移;
   emit f_end; // needed?
   [emit ev;]
   return (v, true);
 }
 ```
-
-に変換
 
 ## クライアントコード変換
 

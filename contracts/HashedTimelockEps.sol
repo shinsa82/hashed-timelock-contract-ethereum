@@ -1,5 +1,19 @@
 pragma solidity ^0.5.0;
 
+contract StateMachine {
+    bytes32 state;
+    modifier init(bytes32 q) {
+        _;
+        state = q;
+    }
+
+    modifier transition(bytes32 current, bytes32 next) {
+        require(state == current, "state pre-condition violated");
+        state = next;
+        _;
+    }
+}
+
 /**
  * @title Hashed Timelock Contracts (HTLCs) on Ethereum ETH.
  *
@@ -18,7 +32,7 @@ pragma solidity ^0.5.0;
  *      withdraw funds the sender / creator of the HTLC can get their ETH
  *      back with this function.
  */
-contract HashedTimelockEps {
+contract HashedTimelockEps is StateMachine {
 
     event LogHTLCNew(
         bytes32 indexed contractId,
@@ -93,6 +107,9 @@ contract HashedTimelockEps {
     }
     mapping (bytes32 => LockContract) contracts;
 
+    constructor() init("q1") public { // if change q1 to q2, htlc4.js fails
+    }
+
     /**
      * @dev Sender sets up a new hash time lock contract depositing the ETH and
      * providing the reciever lock terms.
@@ -107,6 +124,7 @@ contract HashedTimelockEps {
     function newContract(address payable _receiver, bytes32 _hashlock, uint _timelock)
         external
         payable
+        transition("q1","q2")
         fundsSent
         futureTimelock(_timelock)
         returns (bytes32 contractId)
@@ -158,6 +176,7 @@ contract HashedTimelockEps {
      */
     function withdraw(bytes32 _contractId, bytes32 _preimage)
         external
+        transition("q2","q3")
         contractExists(_contractId)
         hashlockMatches(_contractId, _preimage)
         returns (bool,bool)
@@ -173,12 +192,18 @@ contract HashedTimelockEps {
         return withdraw_end(_contractId, true);
     }
 
-    function withdraw_end(bytes32 _contractId, bool ret) internal returns (bool,bool) {
+    function withdraw_end(bytes32 _contractId, bool ret)
+        internal
+        transition("q3","q4")
+        returns (bool,bool) {
         emit LogHTLCWithdraw(_contractId);
         return (ret, true);
     }
 
-    function withdraw_err() internal returns (bool, bool) {
+    function withdraw_err()
+        internal
+        transition("q3","q5")
+        returns (bool, bool) {
         emit LogHTLCWithdrawError();
         return (false,false);
     }
