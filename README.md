@@ -56,10 +56,9 @@ HTLCを論文での実証実験用に書き直しているプロジェクト。
 いくつか仮定と制限をおく。
 TX が revert すると状態の変更ができないため。ただし、低レベルコールを使うと他のコントラクトを呼び出した結果がrevertしたかどうかを取れるらしい。ので、今回は時間が足りないが、やはりwrapperコントラクトとして状態機械を実装し、そちらで例外の処理と状態の管理をするのはよいと思う。
 
-- メソッドの返り値は bool 型に限定
-- revert しているメソッドを、revert しないものに書き換える。そのかわり false を返すようにする 
-- 本文ではエラーが起きない
-- emit は return 文の直前にある。
+- revert しているメソッドを、revert しないものに書き換える。そのかわり TX の成功・失敗を返り値の末尾につける
+- modifier ですべてのエラーチェックが済んでいて、本文ではエラーが起きないものとする (Solidity のbest practice にある内容なので、無茶な仮定ではないと思う)
+- emit があるとしたら return 文の直前にある。
 
 変換ルール
 
@@ -76,6 +75,7 @@ function f(args) m_1, m_2, ..., m_n returns T {
 
 ```
 function f(args) state_check returns (T, bool) { // state_check is modifier
+  状態遷移
   if !(m_1(...)) return f_err()
   ...
   if !(m_n(...)) return f_err()
@@ -98,6 +98,10 @@ function f_end(T v) internal returns (T, bool) {
 ```
 
 に変換
+
+## クライアントコード変換
+
+to be written
 
 ## オリジナルコード
 # hashed-timelock-contract-ethereum
