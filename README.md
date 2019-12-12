@@ -51,6 +51,54 @@ HTLCを論文での実証実験用に書き直しているプロジェクト。
 
 ## 2台帳、2コントラクト、2クライアント (両方EPS化、enforced)
 
+## コントラクト変換
+
+いくつか仮定と制限をおく。
+TX が revert すると状態の変更ができないため。ただし、低レベルコールを使うと他のコントラクトを呼び出した結果がrevertしたかどうかを取れるらしい。ので、今回は時間が足りないが、やはりwrapperコントラクトとして状態機械を実装し、そちらで例外の処理と状態の管理をするのはよいと思う。
+
+- メソッドの返り値は bool 型に限定
+- revert しているメソッドを、revert しないものに書き換える。そのかわり false を返すようにする 
+- 本文ではエラーが起きない
+- emit は return 文の直前にある。
+
+変換ルール
+
+```
+// m_i は modifier
+function f(args) m_1, m_2, ..., m_n returns T { 
+  S;
+  [emit ev;]
+  return v_T;  // value of type T
+} 
+```
+
+を
+
+```
+function f(args) state_check returns (T, bool) { // state_check is modifier
+  if !(m_1(...)) return f_err()
+  ...
+  if !(m_n(...)) return f_err()
+  S
+  return f_end(v_T)
+}
+
+function f_err() internal returns (T, bool) {
+  状態遷移
+  emit f_err;
+  return (*, false); // * is zero value of type T
+}
+
+function f_end(T v) internal returns (T, bool) {
+  状態遷移;
+  emit f_end; // needed?
+  [emit ev;]
+  return (v, true);
+}
+```
+
+に変換
+
 ## オリジナルコード
 # hashed-timelock-contract-ethereum
 
