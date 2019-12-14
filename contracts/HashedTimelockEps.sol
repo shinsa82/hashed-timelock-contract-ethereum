@@ -1,18 +1,6 @@
 pragma solidity ^0.5.0;
 
-contract StateMachine {
-    bytes32 state;
-    modifier init(bytes32 q) {
-        _;
-        state = q;
-    }
-
-    modifier transition(bytes32 current, bytes32 next) {
-        require(state == current, "state pre-condition violated");
-        state = next;
-        _;
-    }
-}
+import "./StateMachine.sol";
 
 /**
  * @title Hashed Timelock Contracts (HTLCs) on Ethereum ETH.
@@ -33,6 +21,7 @@ contract StateMachine {
  *      back with this function.
  */
 contract HashedTimelockEps is StateMachine {
+    enum State {q1,q2,q3,q4,q5}
 
     event LogHTLCNew(
         bytes32 indexed contractId,
@@ -107,7 +96,7 @@ contract HashedTimelockEps is StateMachine {
     }
     mapping (bytes32 => LockContract) contracts;
 
-    constructor() init("q1") public { // if change q1 to q2, htlc4.js fails
+    constructor() init(uint(State.q1)) public { // if change q1 to q2, htlc4.js fails
     }
 
     /**
@@ -124,7 +113,7 @@ contract HashedTimelockEps is StateMachine {
     function newContract(address payable _receiver, bytes32 _hashlock, uint _timelock)
         external
         payable
-        transition("q1","q2")
+        // transition(State.q1, State.q2)
         fundsSent
         futureTimelock(_timelock)
         returns (bytes32 contractId)
@@ -176,7 +165,7 @@ contract HashedTimelockEps is StateMachine {
      */
     function withdraw(bytes32 _contractId, bytes32 _preimage)
         external
-        transition("q2","q3")
+        // transition(State.q2, State.q3)
         contractExists(_contractId)
         hashlockMatches(_contractId, _preimage)
         returns (bool,bool)
@@ -194,7 +183,7 @@ contract HashedTimelockEps is StateMachine {
 
     function withdraw_end(bytes32 _contractId, bool ret)
         internal
-        transition("q3","q4")
+        // transition(State.q3, State.q4)
         returns (bool,bool) {
         emit LogHTLCWithdraw(_contractId);
         return (ret, true);
@@ -202,7 +191,7 @@ contract HashedTimelockEps is StateMachine {
 
     function withdraw_err()
         internal
-        transition("q3","q5")
+        // transition(State.q3, State.q5)
         returns (bool, bool) {
         emit LogHTLCWithdrawError();
         return (false,false);

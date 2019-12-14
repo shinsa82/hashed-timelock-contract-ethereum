@@ -20,7 +20,9 @@
     "test:htlc3": "truffle test ./test/htlc3.js",
     "test:htlc4": "truffle test ./test/htlc4.js",
     "test:dvp1": "truffle test ./test/htlc-dvp1.js",
-    "test": "truffle test"
+    "test": "truffle test",
+    "test:wrapper": "DEBUG=state-machine,js-wrapper truffle test evaluations/js-wrapper.1.js",
+    "test:wrapper:quiet": "truffle test evaluations/js-wrapper.1.js"
   },
   "keywords": [
     "ethereum",
@@ -30,8 +32,11 @@
   ],
   "homepage": "https://github.com/chatch/hashed-timelock-contract-ethereum#README.md",
   "dependencies": {
+    "assign-deep": "^1.0.1",
+    "debug": "^4.1.1",
     "openzeppelin-solidity": "^2.4.0",
-    "solium": "^1.2.5"
+    "solium": "^1.2.5",
+    "supports-color": "^7.1.0"
   },
   "devDependencies": {
     "delay": "^4.3.0",
