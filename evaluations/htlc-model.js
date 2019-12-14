@@ -1,6 +1,6 @@
-const { makeModel } = require('./model')
+const { makeModel } = require('./state-machine')
 
-module.exports = makeModel({
+const theModel = makeModel({
   init: 'q2',
   transitions: [
     ['q2', 'Sec.newContract', 'q4'],
@@ -11,8 +11,8 @@ module.exports = makeModel({
     ['q8', 'Sec.withdraw', 'q10'],
     ['q10', 'Sec.withdraw_end', 'q12'],
     ['q10', 'Sec.withdraw_err_expired', "q12'"],
-    ['q12', 'END', 'last'],
-    ["q12'", 'END', 'last'],
+    ['q12', '_end', 'last'],
+    ["q12'", '_end', 'last'],
     // left route
     ['q6', 'Cash.withdraw_err_expired', 'q7'],
     ['q7', 'Cash.refund', 'q9'],
@@ -26,4 +26,9 @@ module.exports = makeModel({
   ],
 })
 
-console.log('%j', module.exports)
+module.exports = { model: theModel }
+
+// if directly called from Node.js
+if (require.main == module) {
+  console.log('%j', module.exports)
+}
