@@ -113,7 +113,7 @@ contract HashedTimelockEps is StateMachine {
     function newContract(address payable _receiver, bytes32 _hashlock, uint _timelock)
         external
         payable
-        transition(State.q1, State.q2)
+        // transition(State.q1, State.q2)
         fundsSent
         futureTimelock(_timelock)
         returns (bytes32 contractId)
@@ -165,7 +165,7 @@ contract HashedTimelockEps is StateMachine {
      */
     function withdraw(bytes32 _contractId, bytes32 _preimage)
         external
-        transition(State.q2, State.q3)
+        // transition(State.q2, State.q3)
         contractExists(_contractId)
         hashlockMatches(_contractId, _preimage)
         returns (bool,bool)
@@ -183,7 +183,7 @@ contract HashedTimelockEps is StateMachine {
 
     function withdraw_end(bytes32 _contractId, bool ret)
         internal
-        transition(State.q3, State.q4)
+        // transition(State.q3, State.q4)
         returns (bool,bool) {
         emit LogHTLCWithdraw(_contractId);
         return (ret, true);
@@ -191,7 +191,7 @@ contract HashedTimelockEps is StateMachine {
 
     function withdraw_err()
         internal
-        transition(State.q3, State.q5)
+        // transition(State.q3, State.q5)
         returns (bool, bool) {
         emit LogHTLCWithdrawError();
         return (false,false);

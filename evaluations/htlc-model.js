@@ -1,4 +1,5 @@
-const { makeModel } = require('./state-machine')
+const debug = require('debug')('HTLC-model')
+const { END, makeModel } = require('./state-machine')
 
 const theModel = makeModel({
   init: 'q2',
@@ -11,8 +12,8 @@ const theModel = makeModel({
     ['q8', 'Sec.withdraw', 'q10'],
     ['q10', 'Sec.withdraw_end', 'q12'],
     ['q10', 'Sec.withdraw_err_expired', "q12'"],
-    ['q12', '_end', 'last'],
-    ["q12'", '_end', 'last'],
+    ['q12', END, 'last'],
+    ["q12'", END, 'last'],
     // left route
     ['q6', 'Cash.withdraw_err_expired', 'q7'],
     ['q7', 'Cash.refund', 'q9'],
