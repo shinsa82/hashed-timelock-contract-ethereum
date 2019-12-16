@@ -1,3 +1,5 @@
+const chalk = require('chalk')
+const m = str => debug(chalk.magentaBright(str))
 const debug = require('debug')('js-wrapper')
 const delay = require('delay') // promisified setTimeout
 const {
@@ -20,6 +22,7 @@ const sec_newContract = async ({ machine, Buyer, Seller, Security, hashPair, sec
     machine.send('Sec.newContract')
 
     const timeLockSeconds = nowSeconds() + secDelta
+    debug('invoking Sec.newContract')
     const newContractTx = await Security.newContract(
         Buyer,
         hashPair.hash,
@@ -40,7 +43,7 @@ const cash_newContract = async ({ machine, Buyer, Seller, Cash, hashPair, cashDe
 
     const timeLockSeconds = nowSeconds() + cashDelta
     // const newSwapTx = await newSwap(BobERC20, htlc, { hashlock: hashPair.hash, timelock: timeLockSeconds }, Bob, Alice)
-
+    debug('invoking Cash.newContract')
     const newContractTx = await Cash.newContract(
         Seller,
         hashPair.hash,
@@ -60,6 +63,7 @@ const cash_withdraw = async ({ machine, Seller, b2aSwapId, hashPair, Cash }) => 
     machine.send('Cash.withdraw')
 
     try {
+        debug('invoking Cash.withdraw')
         const withdrawTx = await Cash.withdraw(b2aSwapId, hashPair.secret, {
             from: Seller,
         })
@@ -67,6 +71,7 @@ const cash_withdraw = async ({ machine, Seller, b2aSwapId, hashPair, Cash }) => 
         if (machine)
             machine.send('Cash.withdraw_end')
     } catch (err) {
+        m('TX failed')
         machine.send('Cash.withdraw_err_expired')
     }
 }
@@ -75,6 +80,7 @@ const sec_withdraw = async ({ machine, Buyer, a2bSwapId, hashPair, Security }) =
     machine.send('Sec.withdraw')
 
     try {
+        debug('invoking Sec.withdraw')
         const withdrawTx = await Security.withdraw(a2bSwapId, hashPair.secret, {
             from: Buyer,
         })
@@ -82,6 +88,7 @@ const sec_withdraw = async ({ machine, Buyer, a2bSwapId, hashPair, Security }) =
 
         machine.send('Sec.withdraw_end')
     } catch (err) {
+        m('TX failed')
         machine.send('Sec.withdraw_err_expired')
     }
 }
@@ -90,6 +97,7 @@ const cash_refund = async ({ machine, Buyer, b2aSwapId, Cash }) => {
     machine.send('Cash.refund')
 
     try {
+        debug('invoking Cash.refund')
         const refundTx = await Cash.refund(b2aSwapId, {
             from: Buyer,
         })
@@ -97,6 +105,7 @@ const cash_refund = async ({ machine, Buyer, b2aSwapId, Cash }) => {
 
         machine.send('Cash.refund_end')
     } catch (err) {
+        m('TX failed')
         machine.send('Cash.refund_err_premature')
     }
 }
@@ -105,6 +114,7 @@ const sec_refund = async ({ machine, Seller, a2bSwapId, Security }) => {
     machine.send('Sec.refund')
 
     try {
+        debug('invoking Sec.refund')
         const refundTx = await Security.refund(a2bSwapId, {
             from: Seller,
         })
@@ -112,6 +122,7 @@ const sec_refund = async ({ machine, Seller, a2bSwapId, Security }) => {
 
         machine.send('Sec.refund_end')
     } catch (err) {
+        m('TX failed')
         machine.send('Sec.refund_err_premature')
     }
 }
@@ -227,23 +238,6 @@ contract('HashedTimelock DvP original', accounts => {
         await end(context)
     })
 
-    it('fail scenario (buyer fails to withdraw)', async () => {
-        const machine = stateMachine(model)
-
-        const Security = await HashedTimelock.new()
-        const Cash = await HashedTimelock.new()
-        const hashPair = newSecretHashPair()
-
-        const context = { hashPair, machine, Security, Cash, Seller, Buyer, secDelta: 2, cashDelta: 1 }
-
-        context.a2bSwapId = await sec_newContract(context)
-        context.b2aSwapId = await cash_newContract(context)
-        await cash_withdraw(context)
-        await delay(2000)
-        await sec_withdraw(context)
-        await end(context)
-    })
-
     it('normal scenario (both seller and buyer refund)', async () => {
         const machine = stateMachine(model)
 
@@ -282,6 +276,23 @@ contract('HashedTimelock DvP original', accounts => {
         await sec_refund(context) // retry
         await delay(1500)
         await sec_refund(context) // retry again
+        await end(context)
+    })
+
+    it('fail scenario (buyer fails to withdraw)', async () => {
+        const machine = stateMachine(model)
+
+        const Security = await HashedTimelock.new()
+        const Cash = await HashedTimelock.new()
+        const hashPair = newSecretHashPair()
+
+        const context = { hashPair, machine, Security, Cash, Seller, Buyer, secDelta: 2, cashDelta: 1 }
+
+        context.a2bSwapId = await sec_newContract(context)
+        context.b2aSwapId = await cash_newContract(context)
+        await cash_withdraw(context)
+        await delay(2000)
+        await sec_withdraw(context)
         await end(context)
     })
 })

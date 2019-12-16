@@ -33,6 +33,7 @@
   "homepage": "https://github.com/chatch/hashed-timelock-contract-ethereum#README.md",
   "dependencies": {
     "assign-deep": "^1.0.1",
+    "chalk": "^3.0.0",
     "debug": "^4.1.1",
     "openzeppelin-solidity": "^2.4.0",
     "solium": "^1.2.5",
