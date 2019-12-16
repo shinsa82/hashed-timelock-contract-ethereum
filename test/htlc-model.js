@@ -25,6 +25,7 @@ const theModel = makeModel({
     ["q13'", 'Sec.refund_err_premature', "q11'"],
     ["q13'", 'Sec.refund_end', 'q12'],
   ],
+  badStates: ['q7', 'q9', "q11'", "q12'", "q13'"],
 })
 
 module.exports = { model: theModel }

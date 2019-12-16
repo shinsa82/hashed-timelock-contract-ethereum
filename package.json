@@ -20,9 +20,11 @@
     "test:htlc3": "truffle test ./test/htlc3.js",
     "test:htlc4": "truffle test ./test/htlc4.js",
     "test:dvp1": "truffle test ./test/htlc-dvp1.js",
-    "test": "truffle test",
-    "test:wrapper": "DEBUG=state-machine,js-wrapper truffle test evaluations/js-wrapper.1.js",
-    "test:wrapper:quiet": "DEBUG=js-wrapper truffle test evaluations/js-wrapper.1.js"
+    "test:wrapper": "DEBUG=state-machine,js-wrapper truffle test test/js-wrapper.1.js",
+    "test:wrapper:quiet": "DEBUG=js-wrapper truffle test test/js-wrapper.1.js",
+    "test:wrapper2": "DEBUG=state-machine,js-wrapper truffle test test/js-wrapper.2.js",
+    "test:wrapper4": "DEBUG=state-machine,js-wrapper truffle test test/js-wrapper.4.js",
+    "test": "truffle test"
   },
   "keywords": [
     "ethereum",

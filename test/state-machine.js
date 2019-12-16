@@ -1,5 +1,7 @@
 const assign = require('assign-deep')
 const debug = require('debug')('state-machine')
+const chalk = require('chalk')
+const y = mes => debug(chalk.yellowBright(mes))
 
 class StateMachine {
   constructor(model) {
@@ -8,6 +10,7 @@ class StateMachine {
     this.model = model // statemachine model
     this.transitions = this.model.transitions // variable shortcut
     this.state = model.init // current state
+    this.badStates = [].concat(this.model.badStates)
   }
 
   set state(next) {
@@ -33,6 +36,9 @@ class StateMachine {
       throw Error(`event ${ev} is not allowed at state ${this.state}`)
     }
     this.state = next
+    if (this.badStates.includes(this.state)) {
+      y(`warning: contract is at errornous state: ${this.state}`)
+    }
   }
 
   async loop() {
@@ -45,7 +51,7 @@ class StateMachine {
 }
 
 module.exports = {
-  makeModel: ({ init, transitions, handler }) => {
+  makeModel: ({ init, transitions, handler, badStates }) => {
     const mk_transitions = (transitions) => {
       const transition = ([current, event, next]) => {
         return { [current]: { [event]: next } }
@@ -53,7 +59,7 @@ module.exports = {
       return assign.apply(null, transitions.map(transition))
     }
 
-    return { init, transitions: mk_transitions(transitions), handler }
+    return { init, transitions: mk_transitions(transitions), handler, badStates }
   },
   stateMachine: (model) => new StateMachine(model),
   END: '_end',

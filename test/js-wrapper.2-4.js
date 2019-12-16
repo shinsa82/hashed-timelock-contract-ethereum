@@ -11,7 +11,7 @@ const {
     random32,
     txContractId,
     txLoggedArgs,
-} = require('../test/helper/utils');
+} = require('../test-old/helper/utils');
 
 const { model } = require('./htlc-model')
 const { END } = require('./state-machine')
