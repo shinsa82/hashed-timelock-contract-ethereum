@@ -25,6 +25,7 @@
     "test:wrapper2": "DEBUG=state-machine,js-wrapper truffle test test/js-wrapper.2.js",
     "test:wrapper4": "DEBUG=state-machine,js-wrapper truffle test test/js-wrapper.4.js",
     "test:wrapper5": "DEBUG=state-machine,js-wrapper truffle test test/js-wrapper.5.js",
+    "test:trans:1": "DEBUG=transpiled,js-wrapper-actions truffle test test/transpiled.1.js",
     "test": "truffle test"
   },
   "keywords": [

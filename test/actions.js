@@ -1,7 +1,7 @@
 const chalk = require('chalk')
 const m = mes => debug(chalk.magentaBright(mes))
 const y = mes => debug(chalk.yellowBright(mes))
-const debug = require('debug')('js-wrapper')
+const debug = require('debug')('js-wrapper-actions')
 const {
     nowSeconds,
     txContractId,
