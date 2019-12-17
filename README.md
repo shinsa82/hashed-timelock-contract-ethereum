@@ -91,8 +91,19 @@ function f(args) m_1, m_2, ..., m_n returns T {
 
 ```
 modifier init(q) {
-  _;
   state = q
+  _;
+}
+
+function find_transitions(transitions, current) returns (State) {
+  ...;
+}
+
+modifier transitions(transitions) {
+  next = find_transition(transitions, state);
+  require(next != null);
+  state = next;
+  _;
 }
 
 function _m(...) internal returns (bool) {
@@ -103,10 +114,8 @@ constructor init(q) {
   ...
 }
 
-function f(args) transition(from, to) returns (T, bool) { // state_check is modifier
-  if !(_m_1(...)) return f_err()
-  ...
-  if !(_m_n(...)) return f_err()
+function f(args) transition(transitions) returns (T, bool) { // state_check is modifier
+  if !(_m_1(...) && ... && _m_n(...))return f_err()
   S
   return f_end(v_T)
 }
@@ -117,7 +126,7 @@ function f_err() internal returns (T, bool) {
 }
 
 function f_end(T v) internal returns (T, bool) {
-  emit f_end; // needed?
+  emit f_end;
   [emit ev;]
   return (v, true);
 }

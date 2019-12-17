@@ -1,0 +1,112 @@
+This is e-pTeX, Version 3.14159265-p3.8.1-180226-2.6 (utf8.euc) (TeX Live 2018) (preloaded format=platex 2018.10.3)  16 DEC 2019 17:59
+entering extended mode
+ restricted \write18 enabled.
+ file:line:error style messages enabled.
+ %&-line parsing enabled.
+**evaluation.tex
+(./evaluation.tex
+pLaTeX2e <2018-07-28>+1 (based on LaTeX2e <2018-04-01> patch level 5)
+(/usr/local/texlive/2018/texmf-dist/tex/platex/jsclasses/jsarticle.cls
+Document Class: jsarticle 2018/06/23 jsclasses (okumura, texjporg)
+\jsc@mpt=\dimen118
+\jsc@mmm=\dimen119
+\jsc@smallskipamount=\skip41
+LaTeX Info: Redefining \rmfamily on input line 466.
+LaTeX Info: Redefining \sffamily on input line 469.
+LaTeX Info: Redefining \ttfamily on input line 472.
+LaTeX Info: Redefining \textmc on input line 476.
+LaTeX Info: Redefining \textgt on input line 478.
+\symmincho=\mathgroup4
+LaTeX Font Info:    Overwriting symbol font `mincho' in version `bold'
+(Font)                  JY1/mc/m/n --> JY1/gt/m/n on input line 540.
+LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
+(Font)              scaled to size 9.60999pt on input line 731.
+LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
+(Font)              scaled to size 9.60999pt on input line 731.
+\fullwidth=\dimen120
+LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
+(Font)              scaled to size 7.68799pt on input line 884.
+LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
+(Font)              scaled to size 7.68799pt on input line 884.
+\c@part=\count83
+\c@section=\count84
+\c@subsection=\count85
+\c@subsubsection=\count86
+\c@paragraph=\count87
+\c@subparagraph=\count88
+\@abstractbox=\box42
+\c@figure=\count89
+\c@table=\count90
+\abovecaptionskip=\skip42
+\belowcaptionskip=\skip43
+\jsc@tocl@width=\dimen121
+\@lnumwidth=\dimen122
+\bibindent=\dimen123
+(/usr/local/texlive/2018/texmf-dist/tex/platex/jsclasses/jslogo.sty
+Package: jslogo 2017/02/24 okumura, texjporg
+LaTeX Info: Redefining \TeX on input line 94.
+LaTeX Info: Redefining \LaTeX on input line 147.
+LaTeX Info: Redefining \LaTeXe on input line 200.
+)
+\heisei=\count91
+)
+(/usr/local/texlive/2018/texmf-dist/tex/latex/booktabs/booktabs.sty
+Package: booktabs 2016/04/27 v1.618033 publication quality tables
+\heavyrulewidth=\dimen124
+\lightrulewidth=\dimen125
+\cmidrulewidth=\dimen126
+\belowrulesep=\dimen127
+\belowbottomsep=\dimen128
+\aboverulesep=\dimen129
+\abovetopsep=\dimen130
+\cmidrulesep=\dimen131
+\cmidrulekern=\dimen132
+\defaultaddspace=\dimen133
+\@cmidla=\count92
+\@cmidlb=\count93
+\@aboverulesep=\dimen134
+\@belowrulesep=\dimen135
+\@thisruleclass=\count94
+\@lastruleclass=\count95
+\@thisrulewidth=\dimen136
+)
+(./evaluation.aux)
+\openout1 = `evaluation.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 4.
+LaTeX Font Info:    ... okay on input line 4.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 4.
+LaTeX Font Info:    ... okay on input line 4.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 4.
+LaTeX Font Info:    ... okay on input line 4.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 4.
+LaTeX Font Info:    ... okay on input line 4.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 4.
+LaTeX Font Info:    ... okay on input line 4.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 4.
+LaTeX Font Info:    ... okay on input line 4.
+LaTeX Font Info:    Checking defaults for JY1/mc/m/n on input line 4.
+LaTeX Font Info:    ... okay on input line 4.
+LaTeX Font Info:    Checking defaults for JT1/mc/m/n on input line 4.
+LaTeX Font Info:    ... okay on input line 4.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <7> on input line 5.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <5> on input line 5.
+LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
+(Font)              scaled to size 6.72699pt on input line 5.
+LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
+(Font)              scaled to size 4.805pt on input line 5.
+ [1
+
+] (./evaluation.aux) ) 
+Here is how much of TeX's memory you used:
+ 488 strings out of 493248
+ 5358 string characters out of 6144402
+ 70374 words of memory out of 5000000
+ 4525 multiletter control sequences out of 15000+600000
+ 8556 words of font info for 38 fonts, out of 8000000 for 9000
+ 934 hyphenation exceptions out of 8191
+ 23i,7n,20p,167b,164s stack positions out of 5000i,500n,10000p,200000b,80000s
+
+Output written on evaluation.dvi (1 page, 932 bytes).

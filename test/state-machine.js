@@ -22,7 +22,7 @@ class StateMachine {
     return this._state
   }
 
-  async send(ev, arg) {
+  send(ev, arg) {
     // debug(`adding event ${ev} to queue...`)
     this.events.push({ ev, arg })
     this._handle()

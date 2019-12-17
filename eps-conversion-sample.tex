@@ -1,0 +1,34 @@
+\documentclass[11pt]{jsarticle}
+\usepackage{amsmath,mathtools}
+\usepackage[defaultsups]{newtxtext}
+\usepackage{newtxmath}
+\usepackage{stmaryrd}
+\usepackage{url}
+\renewcommand{\UrlBreaks}{\do\-\do\_\do\/}
+\title{EPS (Event-Passing Style) Conversion Sample}
+\author{shinsa, hito}
+\begin{document}
+\maketitle
+\section{Conversion}
+\subsection{Source Contracts}
+\begin{alignat}{2}
+S  & ::= \dots && \quad\text{(statement)} \\
+m  & ::= \texttt{modifier}(\bar{x}) \{ \texttt{require}(r_1);\, \dots;\, \texttt{require}(r_n);\, \_; \} & &\quad\text{(modifier)} \\
+c  & ::= \{ f(\mathit{\bar{x}}) \, m_1, \dots, m_n \{S\} \mid f \in F_C \}  & & \quad\text{(contract)} 
+\end{alignat}
+\subsection{StateMachines}
+\begin{alignat}{2}
+s \in S_C & && \quad\text{(state)} \\
+c \in C &&& \quad\text{(contract instance name)}\\ 
+f \in F_C &&& \quad\text{(contract method)}\\
+t \in T & ::= \{ (s_1, c.f, s_2) \mid c \in C, s_i \in S_C, f \in F_C \} &&\quad\text{(transition)} \\
+M \in \mathcal{M} & ::= (C, \{ S_C \}, \{F_C\},  T)  & & \quad\text{(statemachine)} 
+\end{alignat}
+\subsection{Converted Contracts}
+$c$ and $c'$ are contract instance name (or contract ID).
+\begin{align}
+\llbracket c \rrbracket_{c'} &= \bigcup \{ \llbracket f (\mathit{\bar{x}}) \, m_1, \dots, m_n \{S\} \rrbracket \mid f \in F_C \} \\
+\llbracket m \rrbracket_{c'} &= \text{ $m(\bar{x})$ returns $(\mathit{bool})\,\{$  return $r_1 \land \dots \land r_n$ $\}$ } \\
+\llbracket f (\mathit{\bar{x}}) \, m_1, \dots, m_n \{S\} \rrbracket &= f (\mathit{\bar{x}}) \{ \text{if !$m_1 \land \dots \land m_n$ return $\mathit{f\_end}(\bar x)$ } \} 
+\end{align}
+\end{document}	

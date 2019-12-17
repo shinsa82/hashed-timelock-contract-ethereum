@@ -1,0 +1,14 @@
+%!TEX TS-program = Landscape
+\documentclass[8pt, english]{jsarticle}
+\usepackage{booktabs}
+\begin{document}
+\begin{tabular}{llrlr}\toprule
+Testcase & Result (Original) & Gas (orig.) & Result (JS Wrapper) & Gas (wrapper) \\
+\midrule
+Normal (both withdraw) & success & $450,928$ & success & $450,928$ \\
+Normal (both refund) & success & $404,354$ & success & $404,354$ \\
+Abnormal (Buyer fails to withdraw) & TX failed & $372,568$ & error (status check failed) & $372,440$ \\
+Abnormal (TX. disorder) & TX failed & $294,080$ & error (precondition failed) & $294,080$ \\
+\bottomrule
+\end{tabular}
+\end{document}

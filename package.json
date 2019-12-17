@@ -24,6 +24,7 @@
     "test:wrapper:quiet": "DEBUG=js-wrapper truffle test test/js-wrapper.1.js",
     "test:wrapper2": "DEBUG=state-machine,js-wrapper truffle test test/js-wrapper.2.js",
     "test:wrapper4": "DEBUG=state-machine,js-wrapper truffle test test/js-wrapper.4.js",
+    "test:wrapper5": "DEBUG=state-machine,js-wrapper truffle test test/js-wrapper.5.js",
     "test": "truffle test"
   },
   "keywords": [
