@@ -2,13 +2,17 @@
 \documentclass[8pt, english]{jsarticle}
 \usepackage{booktabs}
 \begin{document}
-\begin{tabular}{llrlr}\toprule
-Testcase & Result (Original) & Gas (orig.) & Result (JS Wrapper) & Gas (wrapper) \\
+\begin{tabular}{llrlrlr}\toprule
+& \multicolumn{2}{c}{Original}
+& \multicolumn{2}{c}{Wrapper}
+& \multicolumn{2}{c}{Transpiled} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7}
+Testcase & Result & Gas & Result & Gas & Result & Gas \\
 \midrule
-Normal (both withdraw) & success & $450,928$ & success & $450,928$ \\
-Normal (both refund) & success & $404,354$ & success & $404,354$ \\
-Abnormal (Buyer fails to withdraw) & TX failed & $372,568$ & error (status check failed) & $372,440$ \\
-Abnormal (TX. disorder) & TX failed & $294,080$ & error (precondition failed) & $294,080$ \\
+Normal (both withdraw) & success & $450,928$ & success & $450,928$ & success & $661,473$ \\
+Normal (both refund) & success & $404,354$ & success & $404,354$ & success & $695,941$ \\
+Abnormal (Buyer fails to withdraw) & TX failed & $372,568$ & error & $372,440$ \\
+Abnormal (TX. disorder) & TX failed & $294,080$ & error & $294,080$ \\
 \bottomrule
 \end{tabular}
 \end{document}

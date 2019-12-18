@@ -1,5 +1,7 @@
 pragma solidity ^0.5.0;
 
+import "./StateMachine.sol";
+
 /**
  * @title Hashed Timelock Contracts (HTLCs) on Ethereum ETH.
  *
@@ -18,7 +20,7 @@ pragma solidity ^0.5.0;
  *      withdraw funds the sender / creator of the HTLC can get their ETH
  *      back with this function.
  */
-contract Cash_HashedTimelock {
+contract Cash_HashedTimelock is StateMachine {
 
     event LogHTLCNew(
         bytes32 indexed contractId,
@@ -30,6 +32,10 @@ contract Cash_HashedTimelock {
     );
     event LogHTLCWithdraw(bytes32 indexed contractId);
     event LogHTLCRefund(bytes32 indexed contractId);
+    event withdraw_end();
+    event withdraw_err();
+    event refund_end();
+    event refund_err();
 
     struct LockContract {
         address payable sender;
@@ -70,6 +76,12 @@ contract Cash_HashedTimelock {
         require(contracts[_contractId].timelock > now, "withdrawable: timelock time must be in the future");
         _;
     }
+    function _withdrawable(bytes32 _contractId) internal returns (bool) {
+        return
+            contracts[_contractId].receiver == msg.sender &&
+            contracts[_contractId].withdrawn == false &&
+            contracts[_contractId].timelock > now;
+    }
     modifier refundable(bytes32 _contractId) {
         require(contracts[_contractId].sender == msg.sender, "refundable: not sender");
         require(contracts[_contractId].refunded == false, "refundable: already refunded");
@@ -77,8 +89,20 @@ contract Cash_HashedTimelock {
         require(contracts[_contractId].timelock <= now, "refundable: timelock not yet passed");
         _;
     }
+    function _refundable(bytes32 _contractId) internal returns (bool) {
+        return 
+            contracts[_contractId].sender == msg.sender &&
+            contracts[_contractId].refunded == false &&
+            contracts[_contractId].withdrawn == false &&
+            contracts[_contractId].timelock <= now;
+    }
 
     mapping (bytes32 => LockContract) contracts;
+
+    /**
+     * constructor added by transpilation
+     */
+    constructor() public init(2) atState(2){}
 
     /**
      * @dev Sender sets up a new hash time lock contract depositing the ETH and
@@ -91,11 +115,14 @@ contract Cash_HashedTimelock {
      * @return contractId Id of the new HTLC. This is needed for subsequent
      *                    calls.
      */
-    function newContract(address payable _receiver, bytes32 _hashlock, uint _timelock)
+    function cash_newContract(address payable _receiver, bytes32 _hashlock, uint _timelock)
         external
         payable
         fundsSent
         futureTimelock(_timelock)
+        atStates([4,0,0,0])
+        transition(4,5)
+
         returns (bytes32 contractId)
     {
         contractId = sha256(
@@ -135,6 +162,14 @@ contract Cash_HashedTimelock {
         );
     }
 
+    function sec_newContract()
+        external
+        payable
+        atStates([2,0,0,0])
+        transition(2,4)
+    {}
+
+
     /**
      * @dev Called by the receiver once they know the preimage of the hashlock.
      * This will transfer the locked funds to their address.
@@ -143,20 +178,48 @@ contract Cash_HashedTimelock {
      * @param _preimage sha256(_preimage) should equal the contract hashlock.
      * @return bool true on success
      */
-    function withdraw(bytes32 _contractId, bytes32 _preimage)
+    function cash_withdraw(bytes32 _contractId, bytes32 _preimage)
         external
         contractExists(_contractId)
         hashlockMatches(_contractId, _preimage)
-        withdrawable(_contractId)
+        // withdrawable(_contractId)
+        atStates([5,0,0,0])
+        transition(5,6)
         returns (bool)
     {
-        LockContract storage c = contracts[_contractId];
-        c.preimage = _preimage;
-        c.withdrawn = true;
-        c.receiver.transfer(c.amount);
-        emit LogHTLCWithdraw(_contractId);
-        return true;
+        if (!_withdrawable(_contractId)) {
+            withdrawErr();
+        } else {
+            LockContract storage c = contracts[_contractId];
+            c.preimage = _preimage;
+            c.withdrawn = true;
+            c.receiver.transfer(c.amount);
+            emit LogHTLCWithdraw(_contractId);
+            withdrawEnd();
+            return true;
+        }
     }
+
+    function withdrawEnd() internal atStates([6,0,0,0]) transition(6,8) {
+        emit withdraw_end();
+
+    }
+
+    function withdrawErr() internal atStates([6,0,0,0]) transition(6,7) {
+        emit withdraw_err();
+    }
+
+    function sec_withdraw()
+        external
+        atStates([8,0,0,0])
+        transition(8,10)
+    {}
+
+    function sec_withdraw_end()
+        external
+        atStates([10,0,0,0])
+        transition(10,12)
+    {}
 
     /**
      * @dev Called by the sender if there was no withdraw AND the time lock has
@@ -165,18 +228,44 @@ contract Cash_HashedTimelock {
      * @param _contractId Id of HTLC to refund from.
      * @return bool true on success
      */
-    function refund(bytes32 _contractId)
+    function cash_refund(bytes32 _contractId)
         external
         contractExists(_contractId)
         refundable(_contractId)
+        atStates([7,0,0,0])
+        transition(7,9)
         returns (bool)
     {
         LockContract storage c = contracts[_contractId];
         c.refunded = true;
         c.sender.transfer(c.amount);
         emit LogHTLCRefund(_contractId);
+        refundEnd();
         return true;
     }
+
+    function refundEnd() internal atStates([9,0,0,0]) transition(9,11) {
+        emit refund_end();
+
+    }
+
+    function sec_refund()
+        external
+        // contractExists(_contractId)
+        // hashlockMatches(_contractId, _preimage)
+        // withdrawable(_contractId)
+        atStates([11,0,0,0])
+        transition(11,13)
+    {}
+
+    function sec_refund_end()
+        external
+        // contractExists(_contractId)
+        // hashlockMatches(_contractId, _preimage)
+        // withdrawable(_contractId)
+        atStates([13,0,0,0])
+        transition(13,12)
+    {}
 
     /**
      * @dev Get contract details.

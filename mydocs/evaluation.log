@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.14159265-p3.8.1-180226-2.6 (utf8.euc) (TeX Live 2018) (preloaded format=platex 2018.10.3)  16 DEC 2019 17:59
+This is e-pTeX, Version 3.14159265-p3.8.1-180226-2.6 (utf8.euc) (TeX Live 2018) (preloaded format=platex 2018.10.3)  18 DEC 2019 16:49
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -103,10 +103,10 @@ LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
 Here is how much of TeX's memory you used:
  488 strings out of 493248
  5358 string characters out of 6144402
- 70374 words of memory out of 5000000
+ 71374 words of memory out of 5000000
  4525 multiletter control sequences out of 15000+600000
  8556 words of font info for 38 fonts, out of 8000000 for 9000
  934 hyphenation exceptions out of 8191
  23i,7n,20p,167b,164s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on evaluation.dvi (1 page, 932 bytes).
+Output written on evaluation.dvi (1 page, 1020 bytes).

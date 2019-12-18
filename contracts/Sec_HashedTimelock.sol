@@ -1,5 +1,7 @@
 pragma solidity ^0.5.0;
 
+import "./StateMachine.sol";
+
 /**
  * @title Hashed Timelock Contracts (HTLCs) on Ethereum ETH.
  *
@@ -18,7 +20,7 @@ pragma solidity ^0.5.0;
  *      withdraw funds the sender / creator of the HTLC can get their ETH
  *      back with this function.
  */
-contract Sec_HashedTimelock {
+contract Sec_HashedTimelock is StateMachine {
 
     event LogHTLCNew(
         bytes32 indexed contractId,
@@ -30,6 +32,10 @@ contract Sec_HashedTimelock {
     );
     event LogHTLCWithdraw(bytes32 indexed contractId);
     event LogHTLCRefund(bytes32 indexed contractId);
+    event withdraw_end();
+    event withdraw_err();
+    event refund_end();
+    event refund_err();
 
     struct LockContract {
         address payable sender;
@@ -81,6 +87,11 @@ contract Sec_HashedTimelock {
     mapping (bytes32 => LockContract) contracts;
 
     /**
+     * constructor added by transpilation
+     */
+    constructor() public init(2) {}
+
+    /**
      * @dev Sender sets up a new hash time lock contract depositing the ETH and
      * providing the reciever lock terms.
      *
@@ -91,11 +102,13 @@ contract Sec_HashedTimelock {
      * @return contractId Id of the new HTLC. This is needed for subsequent
      *                    calls.
      */
-    function newContract(address payable _receiver, bytes32 _hashlock, uint _timelock)
+    function sec_newContract(address payable _receiver, bytes32 _hashlock, uint _timelock)
         external
         payable
         fundsSent
         futureTimelock(_timelock)
+        atStates([2,0,0,0])
+        transition(2,4)
         returns (bytes32 contractId)
     {
         contractId = sha256(
@@ -135,6 +148,13 @@ contract Sec_HashedTimelock {
         );
     }
 
+    function cash_newContract()
+        external
+        payable
+        atStates([4,0,0,0])
+        transition(4,5)
+    {}
+
     /**
      * @dev Called by the receiver once they know the preimage of the hashlock.
      * This will transfer the locked funds to their address.
@@ -143,11 +163,13 @@ contract Sec_HashedTimelock {
      * @param _preimage sha256(_preimage) should equal the contract hashlock.
      * @return bool true on success
      */
-    function withdraw(bytes32 _contractId, bytes32 _preimage)
+    function sec_withdraw(bytes32 _contractId, bytes32 _preimage)
         external
         contractExists(_contractId)
         hashlockMatches(_contractId, _preimage)
         withdrawable(_contractId)
+        atStates([8,0,0,0])
+        transition(8,10)
         returns (bool)
     {
         LockContract storage c = contracts[_contractId];
@@ -155,8 +177,66 @@ contract Sec_HashedTimelock {
         c.withdrawn = true;
         c.receiver.transfer(c.amount);
         emit LogHTLCWithdraw(_contractId);
+        sec_withdraw_end();
         return true;
     }
+
+    function sec_withdraw_end()
+        internal
+        atStates([10,0,0,0])
+        transition(10,12)
+    {
+        emit withdraw_end();
+    }
+
+    function sec_withdraw_err() internal {
+        emit withdraw_err();
+    }
+
+    function cash_withdraw()
+        external
+        // contractExists(_contractId)
+        // hashlockMatches(_contractId, _preimage)
+        // withdrawable(_contractId)
+        atStates([5,0,0,0])
+        transition(5,6)
+    {}
+
+    function cash_withdraw_end()
+        external
+        // contractExists(_contractId)
+        // hashlockMatches(_contractId, _preimage)
+        // withdrawable(_contractId)
+        atStates([6,0,0,0])
+        transition(6,8)
+    {}
+
+    function cash_withdraw_err()
+        external
+        // contractExists(_contractId)
+        // hashlockMatches(_contractId, _preimage)
+        // withdrawable(_contractId)
+        atStates([6,0,0,0])
+        transition(6,7)
+    {}
+
+    function cash_refund()
+        external
+        // contractExists(_contractId)
+        // hashlockMatches(_contractId, _preimage)
+        // withdrawable(_contractId)
+        atStates([7,0,0,0])
+        transition(7,9)
+    {}
+
+    function cash_refund_end()
+        external
+        // contractExists(_contractId)
+        // hashlockMatches(_contractId, _preimage)
+        // withdrawable(_contractId)
+        atStates([9,0,0,0])
+        transition(9,11)
+    {}
 
     /**
      * @dev Called by the sender if there was no withdraw AND the time lock has
@@ -165,7 +245,7 @@ contract Sec_HashedTimelock {
      * @param _contractId Id of HTLC to refund from.
      * @return bool true on success
      */
-    function refund(bytes32 _contractId)
+    function sec_refund(bytes32 _contractId)
         external
         contractExists(_contractId)
         refundable(_contractId)
@@ -175,6 +255,7 @@ contract Sec_HashedTimelock {
         c.refunded = true;
         c.sender.transfer(c.amount);
         emit LogHTLCRefund(_contractId);
+        emit refund_end();
         return true;
     }
 

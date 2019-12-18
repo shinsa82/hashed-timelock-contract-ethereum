@@ -20,7 +20,7 @@ import "./StateMachine.sol";
  *      withdraw funds the sender / creator of the HTLC can get their ETH
  *      back with this function.
  */
-contract HashedTimelockEps is StateMachine {
+contract HashedTimelockEps {
     enum State {q1,q2,q3,q4,q5}
 
     event LogHTLCNew(

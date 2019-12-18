@@ -25,7 +25,8 @@
     "test:wrapper2": "DEBUG=state-machine,js-wrapper truffle test test/js-wrapper.2.js",
     "test:wrapper4": "DEBUG=state-machine,js-wrapper truffle test test/js-wrapper.4.js",
     "test:wrapper5": "DEBUG=state-machine,js-wrapper truffle test test/js-wrapper.5.js",
-    "test:trans:1": "DEBUG=transpiled,js-wrapper-actions truffle test test/transpiled.1.js",
+    "test:trans:1": "DEBUG=transpiled:* truffle test test/transpiled.1.js",
+    "test:trans:2": "DEBUG=transpiled:* truffle test test/transpiled.2.js",
     "test": "truffle test"
   },
   "keywords": [
@@ -39,6 +40,7 @@
     "assign-deep": "^1.0.1",
     "chalk": "^3.0.0",
     "debug": "^4.1.1",
+    "lodash": "^4.17.15",
     "openzeppelin-solidity": "^2.4.0",
     "solium": "^1.2.5",
     "supports-color": "^7.1.0"

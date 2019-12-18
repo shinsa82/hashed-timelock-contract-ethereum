@@ -58,8 +58,20 @@ module.exports = {
       }
       return assign.apply(null, transitions.map(transition))
     }
+    const mk_transByEvent = (transitions) => {
+      const transition = ([current, event, next]) => {
+        return { [event]: { [current]: next } }
+      }
+      return assign.apply(null, transitions.map(transition))
+    }
 
-    return { init, transitions: mk_transitions(transitions), handler, badStates }
+    return {
+      init,
+      transitions: mk_transitions(transitions),
+      transByEvent: mk_transByEvent(transitions),
+      handler,
+      badStates,
+    }
   },
   stateMachine: (model) => new StateMachine(model),
   END: '_end',

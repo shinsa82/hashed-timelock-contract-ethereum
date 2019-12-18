@@ -40,7 +40,7 @@ contract('HashedTimelock DvP transpiled contracts', accounts => {
         }
     }
 
-    it('normal scenario (both seller and buyer withdraw)', async () => {
+    it('normal scenario 2 (both seller and buyer refund)', async () => {
         const machine = stateMachine(model)
 
         const Security = await SecHashedTimelock.new()
@@ -51,8 +51,11 @@ contract('HashedTimelock DvP transpiled contracts', accounts => {
 
         context.a2bSwapId = await sec_newContract(context)
         context.b2aSwapId = await cash_newContract(context)
+
+        await delay(3500)
         await cash_withdraw(context)
-        await sec_withdraw(context)
+        await cash_refund(context)
+        await sec_refund(context)
         await end(context)
 
         debug(totalGasUsed())
