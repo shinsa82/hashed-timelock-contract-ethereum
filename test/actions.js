@@ -1,7 +1,7 @@
 const chalk = require('chalk')
 const m = mes => debug(chalk.magentaBright(mes))
 const y = mes => debug(chalk.yellowBright(mes))
-const debug = require('debug')('js-wrapper')
+const debug = require('debug')('js-wrapper:actions')
 const {
     nowSeconds,
     txContractId,
@@ -9,7 +9,14 @@ const {
 
 const { END } = require('./state-machine')
 const oneFinney = web3.utils.toWei(web3.utils.toBN(1), 'finney')
-const debugGasUsed = (tx) => debug('gas used:', tx.receipt.gasUsed)
+let _totalGasUsed = 0
+const debugGasUsed = (tx) => {
+    debug('gas used:', tx.receipt.gasUsed)
+    _totalGasUsed += tx.receipt.gasUsed
+}
+const reset = () => {
+    _totalGasUsed = 0
+}
 
 const sec_newContract = async ({ machine, Buyer, Seller, Security, hashPair, secDelta }) => {
     machine.send('Sec.newContract')
@@ -64,7 +71,7 @@ const cash_withdraw = async ({ machine, Seller, b2aSwapId, hashPair, Cash }) => 
         if (machine)
             machine.send('Cash.withdraw_end')
     } catch (err) {
-        m('TX failed')
+        m(`TX failed: ${err}`)
         machine.send('Cash.withdraw_err_expired')
     }
 }
@@ -81,7 +88,7 @@ const sec_withdraw = async ({ machine, Buyer, a2bSwapId, hashPair, Security }) =
 
         machine.send('Sec.withdraw_end')
     } catch (err) {
-        m('TX failed')
+        m(`TX failed: ${err}`)
         machine.send('Sec.withdraw_err_expired')
     }
 }
@@ -99,7 +106,7 @@ const cash_refund = async ({ machine, Buyer, b2aSwapId, Cash }) => {
 
             machine.send('Cash.refund_end')
         } catch (err) {
-            m('TX failed')
+            m(`TX failed: ${err}`)
             machine.send('Cash.refund_err_premature')
         }
     } catch (err) {
@@ -119,7 +126,7 @@ const sec_refund = async ({ machine, Seller, a2bSwapId, Security }) => {
 
         machine.send('Sec.refund_end')
     } catch (err) {
-        m('TX failed')
+        m(`TX failed: ${err}`)
         machine.send('Sec.refund_err_premature')
     }
 }
@@ -127,6 +134,8 @@ const sec_refund = async ({ machine, Seller, a2bSwapId, Security }) => {
 const end = async ({ machine }) => {
     machine.send(END)
 }
+
+const totalGasUsed = () => _totalGasUsed
 
 module.exports = {
     cash_newContract,
@@ -136,4 +145,6 @@ module.exports = {
     sec_refund,
     sec_withdraw,
     end,
+    totalGasUsed,
+    reset,
 }

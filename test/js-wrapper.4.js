@@ -137,7 +137,7 @@ contract('HashedTimelock DvP with JS wrapper', accounts => {
     const HashedTimelock = artifacts.require('./HashedTimelock.sol')
     const { stateMachine } = require('./state-machine')
 
-    it('fail scenario 1 (buyer fails to withdraw)', async () => {
+    it('fail scenario 1 (non-termination)', async () => {
         const machine = stateMachine(model)
 
         const Security = await HashedTimelock.new()
@@ -165,7 +165,7 @@ contract('HashedTimelock DvP original', accounts => {
         }
     }
 
-    it('fail scenario 1 (buyer fails to withdraw)', async () => {
+    it('fail scenario 1 (non-termination)', async () => {
         const machine = stateMachine(model)
 
         const Security = await HashedTimelock.new()
