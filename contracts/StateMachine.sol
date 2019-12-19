@@ -1,6 +1,9 @@
 pragma solidity ^0.5.0;
 
 contract StateMachine {
+    event StateChanged(uint8 state);
+    event TerminatedAtState(uint8 state);
+
     uint8 state;
 
     modifier init(uint8 q) {
@@ -9,7 +12,6 @@ contract StateMachine {
     }
 
     modifier transition(uint8 from, uint8 to) {
-        require(state == from, "state pre-condition violated");
         if (state == from) {
             state = to;
         }

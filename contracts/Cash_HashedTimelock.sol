@@ -221,6 +221,12 @@ contract Cash_HashedTimelock is StateMachine {
         transition(10,12)
     {}
 
+    function sec_withdraw_err()
+        external
+        atStates([10,0,0,0])
+        transition(10,112)
+    {}
+
     /**
      * @dev Called by the sender if there was no withdraw AND the time lock has
      * expired. This will refund the contract amount.
@@ -231,9 +237,9 @@ contract Cash_HashedTimelock is StateMachine {
     function cash_refund(bytes32 _contractId)
         external
         contractExists(_contractId)
-        refundable(_contractId)
         atStates([7,0,0,0])
         transition(7,9)
+        refundable(_contractId)
         returns (bool)
     {
         LockContract storage c = contracts[_contractId];
@@ -266,6 +272,15 @@ contract Cash_HashedTimelock is StateMachine {
         atStates([13,0,0,0])
         transition(13,12)
     {}
+
+    function end()
+        external
+        atStates([12,112,0,0])
+        transition(12,255)
+        transition(112,255)
+    {
+        emit TerminatedAtState(state);
+    }
 
     /**
      * @dev Get contract details.

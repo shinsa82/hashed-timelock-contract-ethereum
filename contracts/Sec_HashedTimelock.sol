@@ -76,6 +76,12 @@ contract Sec_HashedTimelock is StateMachine {
         require(contracts[_contractId].timelock > now, "withdrawable: timelock time must be in the future");
         _;
     }
+    function _withdrawable(bytes32 _contractId) internal returns (bool) {
+        return
+            contracts[_contractId].receiver == msg.sender &&
+            contracts[_contractId].withdrawn == false &&
+            contracts[_contractId].timelock > now;
+    }
     modifier refundable(bytes32 _contractId) {
         require(contracts[_contractId].sender == msg.sender, "refundable: not sender");
         require(contracts[_contractId].refunded == false, "refundable: already refunded");
@@ -167,18 +173,22 @@ contract Sec_HashedTimelock is StateMachine {
         external
         contractExists(_contractId)
         hashlockMatches(_contractId, _preimage)
-        withdrawable(_contractId)
+        // withdrawable(_contractId)
         atStates([8,0,0,0])
         transition(8,10)
         returns (bool)
     {
-        LockContract storage c = contracts[_contractId];
-        c.preimage = _preimage;
-        c.withdrawn = true;
-        c.receiver.transfer(c.amount);
-        emit LogHTLCWithdraw(_contractId);
-        sec_withdraw_end();
-        return true;
+        if (!_withdrawable(_contractId)) {
+            sec_withdraw_err();
+        } else {
+            LockContract storage c = contracts[_contractId];
+            c.preimage = _preimage;
+            c.withdrawn = true;
+            c.receiver.transfer(c.amount);
+            emit LogHTLCWithdraw(_contractId);
+            sec_withdraw_end();
+            return true;
+        }
     }
 
     function sec_withdraw_end()
@@ -189,8 +199,13 @@ contract Sec_HashedTimelock is StateMachine {
         emit withdraw_end();
     }
 
-    function sec_withdraw_err() internal {
+    function sec_withdraw_err()
+        internal
+        atStates([10,0,0,0])
+        transition(10,112)
+    {
         emit withdraw_err();
+        emit StateChanged(state);
     }
 
     function cash_withdraw()
@@ -237,6 +252,15 @@ contract Sec_HashedTimelock is StateMachine {
         atStates([9,0,0,0])
         transition(9,11)
     {}
+
+    function end()
+        external
+        atStates([12,112,0,0])
+        transition(12,255)
+        transition(112,255)
+    {
+        emit TerminatedAtState(state);
+    }
 
     /**
      * @dev Called by the sender if there was no withdraw AND the time lock has

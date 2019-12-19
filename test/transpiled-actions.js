@@ -1,10 +1,10 @@
 const _ = require('lodash')
 const chalk = require('chalk')
-const m = mes => debug(chalk.magentaBright(mes))
 const y = mes => debug(chalk.yellowBright(mes))
 const debug = require('debug')('transpiled:actions')
 const main = require('debug')('transpiled:actions:main')
 const sub = require('debug')('transpiled:actions:sub')
+const m = (logger = debug, mes) => logger(chalk.magentaBright(mes))
 const {
     nowSeconds,
     txContractId,
@@ -84,28 +84,20 @@ const cash_withdraw = async ({ machine, Seller, b2aSwapId, hashPair, Cash, Secur
         if (_.find(withdrawTx.logs, ['event', 'withdraw_end'])) {
             main('-- withdraw_end found')
             sub('invoking Security.cash_withdraw')
-            showGasUsed(sub,
-                await Security.cash_withdraw(b2aSwapId, hashPair.secret, {
-                    from: Seller,
-                })
-            )
+            showGasUsed(sub, await Security.cash_withdraw())
             sub('invoking Security.cash_withdraw_end')
             showGasUsed(sub,
                 await Security.cash_withdraw_end()
             )
         } else if (_.find(withdrawTx.logs, ['event', 'withdraw_err'])) {
-            main('-- withdraw_err found')
+            m(main, '-- withdraw_err found')
             sub('invoking Security.cash_withdraw')
-            showGasUsed(sub,
-                await Security.cash_withdraw()
-            )
+            showGasUsed(sub, await Security.cash_withdraw())
             sub('invoking Security.cash_withdraw_err')
-            showGasUsed(sub,
-                await Security.cash_withdraw_err()
-            )
+            showGasUsed(sub, await Security.cash_withdraw_err())
         }
     } catch (err) {
-        m(`TX failed: ${err}`)
+        m(debug, `TX failed: ${err}`)
     }
 }
 
@@ -120,12 +112,21 @@ const sec_withdraw = async ({ machine, Buyer, a2bSwapId, hashPair, Cash, Securit
         })
         showGasUsed(main, withdrawTx)
 
-        sub('invoking Cash.sec_withdraw')
-        showGasUsed(sub, await Cash.sec_withdraw())
-        sub('invoking Cash.sec_withdraw_end')
-        showGasUsed(sub, await Cash.sec_withdraw_end())
+        if (_.find(withdrawTx.logs, ['event', 'withdraw_end'])) {
+            main('-- withdraw_end found')
+            sub('invoking Cash.sec_withdraw')
+            showGasUsed(sub, await Cash.sec_withdraw())
+            sub('invoking Cash.sec_withdraw_end')
+            showGasUsed(sub, await Cash.sec_withdraw_end())
+        } else if (_.find(withdrawTx.logs, ['event', 'withdraw_err'])) {
+            m(main, '-- withdraw_err found')
+            sub('invoking Cash.sec_withdraw')
+            showGasUsed(sub, await Cash.sec_withdraw())
+            sub('invoking Cash.sec_withdraw_err')
+            showGasUsed(sub, await Cash.sec_withdraw_err())
+        }
     } catch (err) {
-        m(`TX failed: ${err}`)
+        m(debug, `TX failed: ${err}`)
         machine.send('Sec.withdraw_err_expired')
     }
 }
@@ -177,8 +178,14 @@ const sec_refund = async ({ machine, Seller, a2bSwapId, Security, Cash }) => {
     }
 }
 
-const end = async ({ machine }) => {
-    machine.send(END)
+const end = async ({ Security, Cash }) => {
+    debug(END)
+    main('invoking Sec.end')
+    const end1 = await Security.end()
+    showGasUsed(main, end1)
+    main('invoking Cash.end')
+    const end2 = await Cash.end()
+    showGasUsed(main, end2)
 }
 
 const totalGasUsed = () => _totalGasUsed
